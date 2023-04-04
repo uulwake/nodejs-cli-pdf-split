@@ -59,4 +59,45 @@ program
     );
   });
 
+program
+  .command("split-merge")
+  .description("Split multiple separate PDF and merge it into one file")
+  .argument("<string>", "PDF filepath")
+  .option("--pages <string>", "start page default to 0", 0)
+  .action(async (filepath, options) => {
+    console.log(`processing ${filepath}...`);
+
+    if (!fs.existsSync("./splits")) {
+      await fs.promises.mkdir("./splits");
+    }
+
+    if (!filepath) {
+      throw new Error(`filepath is required`);
+    }
+
+    const docmentAsBytes = await fs.promises.readFile(filepath);
+    const pdfDoc = await PDFDocument.load(docmentAsBytes);
+
+    const subDocument = await PDFDocument.create();
+    const idxs = options.pages.split(",");
+    for (const idx of idxs) {
+      const [start, end] = idx.split("-").map((el) => Number(el));
+      console.log(`split ${filepath} from: ${start} until: ${end}`);
+
+      for (let i = start - 1; i < end; i++) {
+        const [copiedPage] = await subDocument.copyPages(pdfDoc, [i]);
+        subDocument.addPage(copiedPage);
+      }
+    }
+
+    console.log("merging files...");
+
+    const filename = `./splits/page_${options.pages.split(",").join("_")}.pdf`;
+    const pdfBytes = await subDocument.save();
+    await fs.promises.writeFile(filename, pdfBytes);
+
+    console.log("file is merged");
+    console.log("file is located in ", filename);
+  });
+
 program.parse();
