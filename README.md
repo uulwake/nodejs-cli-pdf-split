@@ -26,11 +26,11 @@ node index.js split sbn.pdf --start=1 --end=20
 ## Multiple Splits & Merge
 
 ```bash
-node index.js split <filepath> --pages=<start-page>-<end-page>,<start-page>-<end-page>
+node index.js split-merge <filepath> --pages=<start-page>-<end-page>,<start-page>-<end-page>
 ```
 
 Example
 
 ```bash
-node index.js split sbn.pdf --pages=10-12,15-20
+node index.js split-merge sbn.pdf --pages=10-12,15-20
 ```
